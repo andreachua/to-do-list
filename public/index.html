@@ -106,14 +106,25 @@
           <button class="filter-btn" data-filter="active" type="button">Active</button>
           <button class="filter-btn" data-filter="completed" type="button">Done</button>
         </div>
-        <label class="sort-control field">
-          <span class="field-label">Sort</span>
-          <select id="sort-select">
-            <option value="newest" selected>newest</option>
-            <option value="due">due date</option>
-            <option value="priority">priority</option>
-          </select>
-        </label>
+        <div class="control-group">
+          <label class="sort-control field">
+            <span class="field-label">When</span>
+            <select id="period-select">
+              <option value="all" selected>any time</option>
+              <option value="day">today</option>
+              <option value="week">this week</option>
+              <option value="month">this month</option>
+            </select>
+          </label>
+          <label class="sort-control field">
+            <span class="field-label">Sort</span>
+            <select id="sort-select">
+              <option value="newest" selected>newest</option>
+              <option value="due">due date</option>
+              <option value="priority">priority</option>
+            </select>
+          </label>
+        </div>
       </div>
 
       <!-- The list -->
