@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do — daily list</title>
+    <meta name="description" content="A personal daily to-do list." />
+
+    <!-- Distinctive type pairing: Space Grotesk (display) + Space Mono (utility).
+         Loaded from Google Fonts when online; robust system fallbacks otherwise. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- Set the saved theme before paint to avoid a flash of the wrong theme. -->
+    <script>
+      (function () {
+        const saved = localStorage.getItem('theme');
+        const prefersDark =
+          window.matchMedia &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute(
+          'data-theme',
+          saved || (prefersDark ? 'dark' : 'light')
+        );
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- Paper grain overlay (the riso "signature") lives on body::before in CSS. -->
+    <main class="sheet">
+      <!-- Masthead: a printed dateline + heavy grotesque title + ink rule -->
+      <header class="masthead">
+        <div class="masthead-row">
+          <p class="dateline" id="dateline">—</p>
+          <button
+            id="theme-toggle"
+            class="stamp-btn"
+            type="button"
+            title="Switch light / dark"
+            aria-label="Switch light / dark"
+          >
+            <span class="theme-icon">dark</span>
+          </button>
+        </div>
+        <h1 class="masthead-title">To&#8209;Do</h1>
+        <p class="masthead-count" id="counter">0 to go</p>
+      </header>
+
+      <!-- Direct, no-apology error message (hidden unless something fails). -->
+      <div id="error-banner" class="notice" role="alert" hidden>
+        <span id="error-text"></span>
+        <button id="error-dismiss" class="notice-x" type="button" aria-label="Dismiss">
+          ✕
+        </button>
+      </div>
+
+      <!-- New entry -->
+      <form id="add-form" class="entry" autocomplete="off">
+        <div class="entry-main">
+          <input
+            id="title-input"
+            class="entry-title"
+            type="text"
+            name="title"
+            placeholder="Write down a task…"
+            maxlength="500"
+            required
+          />
+          <button id="add-btn" class="ink-btn" type="submit">Add</button>
+        </div>
+        <div class="entry-meta">
+          <label class="field">
+            <span class="field-label">Due</span>
+            <input id="due-input" type="date" name="due_date" />
+          </label>
+          <label class="field">
+            <span class="field-label">Priority</span>
+            <select id="priority-input" name="priority">
+              <option value="low">low</option>
+              <option value="medium" selected>med</option>
+              <option value="high">high</option>
+            </select>
+          </label>
+          <label class="field field-notes">
+            <span class="field-label">Notes</span>
+            <input
+              id="notes-input"
+              type="text"
+              name="notes"
+              placeholder="optional"
+              maxlength="2000"
+            />
+          </label>
+        </div>
+      </form>
+
+      <!-- Controls: filters + sort -->
+      <div class="controls">
+        <div class="filters" role="tablist" aria-label="Filter tasks">
+          <button class="filter-btn is-active" data-filter="all" type="button">All</button>
+          <button class="filter-btn" data-filter="active" type="button">Active</button>
+          <button class="filter-btn" data-filter="completed" type="button">Done</button>
+        </div>
+        <label class="sort-control field">
+          <span class="field-label">Sort</span>
+          <select id="sort-select">
+            <option value="newest" selected>newest</option>
+            <option value="due">due date</option>
+            <option value="priority">priority</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- The list -->
+      <ul id="task-list" class="list"></ul>
+
+      <!-- Empty state: an invitation to act -->
+      <p id="empty-state" class="empty" hidden>Nothing on the list yet.</p>
+
+      <!-- Footer: clear done -->
+      <footer class="foot">
+        <button id="clear-completed" class="text-btn" type="button">Clear done</button>
+      </footer>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
