@@ -17,6 +17,13 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
+// pg emits 'error' on idle clients that hit a network problem (e.g. the host
+// closing a connection). Without a listener, that's an uncaught exception
+// that crashes the whole process — so just log it and let the pool recover.
+pool.on('error', (err) => {
+  console.error('Unexpected Postgres pool error:', err);
+});
+
 // Select columns with due_date/created_at pre-formatted so the API returns the
 // same string shapes as SQLite ('YYYY-MM-DD' dates, ISO timestamps).
 const SELECT_COLS = `

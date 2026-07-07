@@ -10,6 +10,16 @@ const db = require('../db');
 
 const router = express.Router();
 
+// Reject malformed ids before they reach the DB layer. Without this, SQLite
+// silently finds no match (-> 404) but Postgres throws on non-numeric input
+// for its BIGINT column (-> 500). Keep both engines consistent.
+router.param('id', (req, res, next, id) => {
+  if (!/^\d+$/.test(id)) {
+    return res.status(400).json({ error: 'Task id must be a positive integer.' });
+  }
+  next();
+});
+
 // --- Validation rules --------------------------------------------------------
 const PRIORITIES = ['low', 'medium', 'high'];
 const MAX_TITLE = 500;
