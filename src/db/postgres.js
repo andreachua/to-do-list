@@ -9,7 +9,11 @@ const { Pool } = require('pg');
 // require SSL; `ssl: { rejectUnauthorized: false }` is the standard setting for
 // their managed certificates.
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  // Accept whichever env var the host provides (see src/db/index.js).
+  connectionString:
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.POSTGRES_PRISMA_URL,
   ssl: { rejectUnauthorized: false },
 });
 

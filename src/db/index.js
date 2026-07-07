@@ -15,11 +15,24 @@
 
 let impl = null;
 
+// Resolve the Postgres connection string from any of the common env var names.
+// Neon's direct string and Vercel's newer integration use DATABASE_URL; older
+// Vercel Postgres uses POSTGRES_URL / POSTGRES_PRISMA_URL. Accepting all of them
+// means the deploy works no matter how the database was attached.
+function postgresUrl() {
+  return (
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    ''
+  );
+}
+
 // Resolve and cache the active engine implementation.
 function getImpl() {
   if (impl) return impl;
 
-  if (process.env.DATABASE_URL) {
+  if (postgresUrl()) {
     impl = require('./postgres');
   } else {
     impl = require('./sqlite');
@@ -29,7 +42,7 @@ function getImpl() {
 
 // Which engine is active — handy for logging/health checks.
 function engineName() {
-  return process.env.DATABASE_URL ? 'postgres' : 'sqlite';
+  return postgresUrl() ? 'postgres' : 'sqlite';
 }
 
 // Create the tasks table if it does not exist yet. Called once on startup.
