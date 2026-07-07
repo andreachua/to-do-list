@@ -317,6 +317,12 @@ body::before {
   align-items: center;
   gap: 8px;
 }
+.control-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  flex-wrap: wrap;
+}
 
 /* --- Task list ------------------------------------------------------------ */
 .list {

@@ -13,6 +13,7 @@
 const state = {
   tasks: [], // full list from the server
   filter: 'all', // 'all' | 'active' | 'completed'
+  period: 'all', // 'all' | 'day' | 'week' | 'month' — filter by due date
   sort: 'newest', // 'newest' | 'due' | 'priority'
 };
 
@@ -30,6 +31,7 @@ const els = {
   counter: document.getElementById('counter'),
   clearCompleted: document.getElementById('clear-completed'),
   sortSelect: document.getElementById('sort-select'),
+  periodSelect: document.getElementById('period-select'),
   filterButtons: document.querySelectorAll('.filter-btn'),
   themeToggle: document.getElementById('theme-toggle'),
   themeIcon: document.querySelector('.theme-icon'),
@@ -86,12 +88,57 @@ const PRIORITY_LABEL = { low: 'low', medium: 'med', high: 'high' };
 // id of the task just added, so it can animate in on the next render
 let justAddedId = null;
 
+// Return the inclusive [start, end] calendar range (local time) for the
+// active period, or null when no period filter is applied ('all'). Dates are
+// compared as 'YYYY-MM-DD' strings so a task's due_date can be tested directly.
+function periodRange() {
+  if (state.period === 'all') return null;
+
+  const toStr = (d) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  if (state.period === 'day') {
+    return { start: toStr(now), end: toStr(now) };
+  }
+
+  if (state.period === 'week') {
+    // Calendar week, Monday–Sunday, containing today.
+    const dow = (now.getDay() + 6) % 7; // 0 = Monday … 6 = Sunday
+    const start = new Date(now);
+    start.setDate(now.getDate() - dow);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    return { start: toStr(start), end: toStr(end) };
+  }
+
+  // 'month' — the calendar month containing today.
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  return { start: toStr(start), end: toStr(end) };
+}
+
 function filteredSortedTasks() {
   let list = state.tasks.slice();
 
   // Filter
   if (state.filter === 'active') list = list.filter((t) => !t.completed);
   if (state.filter === 'completed') list = list.filter((t) => t.completed);
+
+  // Period filter — keep tasks whose due date falls in the selected range.
+  // Tasks without a due date don't belong to any period, so they're excluded.
+  const range = periodRange();
+  if (range) {
+    list = list.filter(
+      (t) => t.due_date && t.due_date >= range.start && t.due_date <= range.end
+    );
+  }
 
   // Sort
   if (state.sort === 'newest') {
@@ -366,6 +413,11 @@ els.themeToggle.addEventListener('click', toggleTheme);
 
 els.sortSelect.addEventListener('change', () => {
   state.sort = els.sortSelect.value;
+  render();
+});
+
+els.periodSelect.addEventListener('change', () => {
+  state.period = els.periodSelect.value;
   render();
 });
 
